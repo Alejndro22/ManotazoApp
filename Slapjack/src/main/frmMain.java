@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;
+import java.util.concurrent.Semaphore;
 
 /**
  *
@@ -30,6 +31,7 @@ public class frmMain extends javax.swing.JFrame {
     private Jugador player3;
     String[] columnNames = {"Puesto", "Jugador", "Tiempo"};
     DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+    private static Semaphore mutex = new Semaphore(1, true); // Controla el acceso a la región crítica
 
     /**
      * Creates new form frmMain
@@ -72,17 +74,23 @@ public class frmMain extends javax.swing.JFrame {
             System.out.println("Jugador " + this.numero + " está atento al mazo");
             while(!intento) {
                 if (generador.getNumeroCarta() == 5) {
-                    manotazo();
-                    System.out.println("Jugador " + this.numero + " entrando a la región crítica");
-                    ordenJugadores[contadorJugadores] = "Jugador " + String.valueOf(numero);
-                    DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-                    Date date = new Date();
-                    ordenTiempos[contadorJugadores] = dateFormat.format(date);
-                    ordenLugares[contadorJugadores] = String.valueOf(contadorJugadores+1) + " lugar";
-                    contadorJugadores++;
-                    System.out.println("Jugador " + this.numero + " saliendo de la región crítica");
-                    intento = true;
-                    System.out.println("Jugador " + this.numero + " esperando resultados");
+                    try {
+                        manotazo();
+                        mutex.acquire();
+                        System.out.println("Jugador " + this.numero + " entrando a la región crítica");
+                        ordenJugadores[contadorJugadores] = "Jugador " + String.valueOf(numero);
+                        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                        Date date = new Date();
+                        ordenTiempos[contadorJugadores] = dateFormat.format(date);
+                        ordenLugares[contadorJugadores] = String.valueOf(contadorJugadores+1) + " lugar";
+                        contadorJugadores++;
+                        System.out.println("Jugador " + this.numero + " saliendo de la región crítica");
+                        mutex.release();
+                        intento = true;
+                        System.out.println("Jugador " + this.numero + " esperando resultados");
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 try {
                     Thread.sleep(10);
