@@ -104,7 +104,7 @@ public class frmMain extends javax.swing.JFrame {
         }
     }
     
-    public class Uno {
+    public class Uno extends Thread {
         private int numeroCarta;
         
         public Uno(){
@@ -154,6 +154,11 @@ public class frmMain extends javax.swing.JFrame {
             btnJugar.setText("Jugar de nuevo");
             btnJugar.setEnabled(true);
             System.out.println("--------------FIN------------------------\n");
+        }
+        
+        @Override
+        public void run(){
+            comenzar_juego();
         }
 
         public int getNumeroCarta() {
@@ -271,9 +276,12 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
         generador = new Uno();
-        generador.comenzar_juego();
+        generador.start();
+        player1 = new Jugador(1);
         player1.start();
+        player2 = new Jugador(2);
         player2.start();
+        player3 = new Jugador(3);
         player3.start();
         btnJugar.setEnabled(false);
     }//GEN-LAST:event_btnJugarActionPerformed
@@ -312,7 +320,7 @@ public class frmMain extends javax.swing.JFrame {
             }
         });
     }
-
+  
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnJugar;
     private javax.swing.JLabel jLabel1;
